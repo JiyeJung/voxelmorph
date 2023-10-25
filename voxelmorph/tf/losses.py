@@ -178,6 +178,26 @@ class Dice:
         dice = tf.reduce_mean(div_no_nan(top, bottom))
         return -dice
 
+class F_beta:
+    """
+    Bigger beta, stronger recall
+    b=1 : F_1 : dice
+    """
+
+    def __init__(self, beta = 1): 
+        self.beta = beta
+    def loss(self, y_true, y_pred):
+        ndims = len(y_pred.get_shape().as_list()) - 2
+        vol_axes = list(range(1, ndims + 1))
+
+        top = (1+self.beta**2) * tf.reduce_sum(y_true * y_pred, vol_axes)
+        bottom = tf.reduce_sum((self.beta**2)*y_true + y_pred, vol_axes)
+
+        div_no_nan = tf.math.divide_no_nan if hasattr(
+            tf.math, 'divide_no_nan') else tf.div_no_nan  # pylint: disable=no-member
+        dice = tf.reduce_mean(div_no_nan(top, bottom))
+        return -dice
+
 
 class Grad:
     """
